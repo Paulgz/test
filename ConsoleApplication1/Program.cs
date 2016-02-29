@@ -9,11 +9,10 @@ namespace ConsoleApplication1 {
         static void Main(string[] args)
         {
             if(args.Length==0) {
-                Console.WriteLine("ERROR: you must specify and input file");
+                Console.WriteLine("ERROR: you must specify an input file");
             }
 
             string inFileName = args[0];
-            Console.WriteLine("Reading \""+inFileName+"\"");
             string[] lines;
             try {
                 lines = File.ReadAllLines(inFileName);
@@ -26,7 +25,10 @@ namespace ConsoleApplication1 {
             List<Person>    people = createGrades(lines);
             string outFileName = inFileName;
             int lastIndex = outFileName.LastIndexOf(".");
-            outFileName = outFileName.Substring(0, lastIndex)+"-graded.txt";
+            if(lastIndex>=0) {
+                outFileName = outFileName.Substring(0, lastIndex);
+            }
+            outFileName += "-graded.txt";
             try {
                 TextWriter tw = new StreamWriter(outFileName);
                 foreach(var person in people) {
@@ -49,7 +51,7 @@ namespace ConsoleApplication1 {
                 string line = s.Trim();
                 string[] parts = line.Split(separators);
                 if(parts.Length<3) {
-                    Console.WriteLine("ERROR: line("+(iline+1)+") Could read all parts");
+                    Console.WriteLine("ERROR: line("+(iline+1)+") Couldn't read all parts");
                     return null;
                 }
                 Person person = new Person();
@@ -59,7 +61,7 @@ namespace ConsoleApplication1 {
                 try {
                     person.score = int.Parse(number);
                 } catch(Exception e) {
-                    Console.WriteLine("ERROR: line("+(iline+1)+") Couldnt read score");
+                    Console.WriteLine("ERROR: line("+(iline+1)+") Couldn't read score");
                     return null;
                 }
                 people.Add(person);
@@ -80,7 +82,7 @@ namespace ConsoleApplication1 {
             });
             return people;
         }
-
+        //*********************************************************
         public  class Person {
             public  string  name;
             public  string  surname;
