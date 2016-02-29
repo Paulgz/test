@@ -3,22 +3,46 @@ using System.Collections.Generic;
 using System.IO;
 
 namespace ConsoleApplication1 {
-    class Program {
+    public  class Program {
         static char[]   separators= {','};
+
         static void Main(string[] args)
         {
+            if(args.Length==0) {
+                Console.WriteLine("ERROR: you must specify and input file");
+            }
+
             string inFileName = args[0];
             Console.WriteLine("Reading \""+inFileName+"\"");
-
             string[] lines;
             try {
                 lines = File.ReadAllLines(inFileName);
-            }catch(Exception e) {
+            } catch(Exception e) {
                 lines = null;
                 Console.WriteLine("ERROR: Failed to read "+inFileName);
                 Console.WriteLine(" "+e.ToString());
                 return;
             }
+            List<Person>    people = createGrades(lines);
+            string outFileName = inFileName;
+            int lastIndex = outFileName.LastIndexOf(".");
+            outFileName = outFileName.Substring(0, lastIndex)+"-graded.txt";
+            try {
+                TextWriter tw = new StreamWriter(outFileName);
+                foreach(var person in people) {
+                    tw.WriteLine(person.surname+", "+person.name+", "+person.score);
+                }
+                tw.Close();
+            } catch(Exception e) {
+                Console.WriteLine("ERROR: Failed to write "+outFileName);
+                Console.WriteLine(" "+e.ToString());
+                return;
+            }
+            Console.WriteLine("Finished: created "+outFileName);
+            return;
+        }
+        public  static  List<Person> createGrades(string[] lines)
+        {
             List<Person> people = new List<Person>();
             for(int iline = 0; iline<lines.Length; iline++) {
                 string s = lines[iline];
@@ -26,7 +50,7 @@ namespace ConsoleApplication1 {
                 string[] parts = line.Split(separators);
                 if(parts.Length<3) {
                     Console.WriteLine("ERROR: line("+(iline+1)+") Could read all parts");
-                    return;
+                    return null;
                 }
                 Person person = new Person();
                 person.surname = parts[0].Trim();
@@ -36,7 +60,7 @@ namespace ConsoleApplication1 {
                     person.score = int.Parse(number);
                 } catch(Exception e) {
                     Console.WriteLine("ERROR: line("+(iline+1)+") Couldnt read score");
-                    return;
+                    return null;
                 }
                 people.Add(person);
             }
@@ -54,36 +78,13 @@ namespace ConsoleApplication1 {
                 }
 
             });
-            string outFileName = inFileName;
-            int lastIndex = outFileName.LastIndexOf(".");
-            outFileName = outFileName.Substring(0, lastIndex)+"-graded.txt";
-            Console.WriteLine("out file="+outFileName);
-            try {
-                TextWriter tw = new StreamWriter(outFileName);
-                foreach(var person in people) {
-                    tw.WriteLine(person.surname+", "+person.name+", "+person.score);
-                }
-                tw.Close();
-
-
-                //System.IO.File.WriteAllText(outFileName,output);
-            } catch(Exception e) {
-                Console.WriteLine("ERROR: Failed to write "+outFileName);
-                Console.WriteLine(" "+e.ToString());
-                return;
-            }
-
-            Console.WriteLine("Finished: created "+outFileName);
+            return people;
         }
 
-        class Person {
+        public  class Person {
             public  string  name;
             public  string  surname;
             public  int     score;
-            public void display()
-            {
-                Console.WriteLine("("+surname+","+name+","+score);
-            }
         }
     }
 }
